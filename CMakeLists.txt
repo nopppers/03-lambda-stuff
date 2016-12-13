@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.5.2)
+enable_testing()
+
+project(Phoenix)
+
+include_directories(lib)
+include_directories(src)
+
+set(PHOENIX_TEST
+    test/val.cpp
+    test/ref.cpp
+    test/arg.cpp
+    test/function.cpp
+)
+
+set(PHOENIX_SRC
+    src/phoenix.hpp
+)
+
+add_executable(phoenix-test
+    ${PHOENIX_TEST}
+    ${PHOENIX_SRC}
+)
+
+add_test(phoenix-tests phoenix-test)
