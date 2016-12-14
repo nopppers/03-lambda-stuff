@@ -283,7 +283,7 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
 
     template <typename T, typename U, typename V>
     typename ResultOf<
-        Func(typename ResultOf<Thing1(T, U, V)>::type, U, V)
+        Func(typename ResultOf<Thing1(T, U, V)>::type)
     >::type operator()(const T &t, const U &u, const V &v) const
     {
         return functor_(thing1_(t, u, v));
@@ -291,7 +291,7 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
 
     template <typename T, typename U>
     typename ResultOf<
-        Func(typename ResultOf<Thing1(T, U)>::type, U)
+        Func(typename ResultOf<Thing1(T, U)>::type)
     >::type operator()(const T &t, const U &u) const
     {
         return functor_(thing1_(t, u));
