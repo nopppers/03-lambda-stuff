@@ -7,5 +7,6 @@ TEST_CASE("functions")
     REQUIRE(Identity(arg1)(0, 1) == 0);
     REQUIRE(Identity(arg2)(0, 1) == 1);
     REQUIRE(Add(arg2, arg1)(1, 2) == 3);
+    //REQUIRE(Sub(arg2, Add(2)(1))(1, 2) == 1);
 }
 

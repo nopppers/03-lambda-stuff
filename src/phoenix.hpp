@@ -443,7 +443,7 @@ struct Identity_impl
 struct Add_impl
 {
     template <typename T>
-    T add(const T &a, const T&b) const
+    T operator()(const T &a, const T&b) const
     {
         return a + b;
     }
@@ -452,7 +452,7 @@ struct Add_impl
 struct Sub_impl
 {
     template <typename T>
-    T sub(const T &a, const T &b) const
+    T operator()(const T &a, const T &b) const
     {
         return a - b;
     }
