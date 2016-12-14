@@ -465,6 +465,57 @@ struct ResultOf<Function<Func>(T, U, V)>
         typename Converter<V>::type> type;
 };
 
+template <typename Func, typename Thing1, typename T>
+struct ResultOf<LazyFunction<Func, Thing1>(T)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T)>::type)>
+            ::type type;
+};
+
+template <typename Func, typename Thing1, typename T, typename U>
+struct ResultOf<LazyFunction<Func, Thing1>(T, U)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename T, typename U, typename V>
+struct ResultOf<LazyFunction<Func, Thing1>(T, U, V)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename Thing2, typename T>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2>(T)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T)>::type,
+             typename ResultOf<Thing2(T)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename Thing2, typename T, typename U>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2>(T, U)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U)>::type,
+             typename ResultOf<Thing2(T, U)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename Thing2, typename T, typename U, typename V>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2>(T, U, V)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V)>::type,
+             typename ResultOf<Thing2(T, U, V)>::type)
+            >::type type;
+};
+
 ///////////////////////////////////
 // Compatible Functors
 ///////////////////////////////////
