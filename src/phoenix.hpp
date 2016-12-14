@@ -290,41 +290,6 @@ struct LazyFunction<Func, Nothing, Nothing, Nothing>
     LazyFunction(Func functor) : functor_(functor) {}
 };
 
-template <typename LazyFunction, typename Selector>
-struct Curry
-{
-    typedef typename ResultOf<typename LazyFunction::functor_type>::type Ret;
-    typedef Ret result_type;
-
-    Ret operator()(LazyFunction func)
-    {
-        return func.functor_();
-    }
-};
-
-template <typename LazyFunction>
-struct Curry<LazyFunction, Nothing>
-{
-    typedef LazyFunction result_type;
-
-    LazyFunction operator()(LazyFunction func)
-    {
-        return func;
-    }
-};
-
-template <typename LazyFunction, typename Selector>
-struct ResultOf<Curry<LazyFunction, Selector>(LazyFunction)>
-{
-    typedef typename Curry<LazyFunction, Selector>::result_type type;
-};
-
-template <typename LazyFunction>
-struct ResultOf<Curry<LazyFunction, Nothing>(LazyFunction)>
-{
-    typedef typename Curry<LazyFunction, Nothing>::result_type type;
-};
-
 template <typename Func, typename Thing1>
 struct LazyFunction<Func, Thing1, Nothing, Nothing>
 {
@@ -332,8 +297,6 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
     Thing1 thing1_;
 
     typedef Func functor_type;
-    typedef Thing1 thing1_type;
-    typedef Curry<const LazyFunction, typename ResultOf<Func>::type> curry;
 
     LazyFunction(Func functor, Thing1 thing1) : functor_(functor), thing1_(thing1) {}
 
@@ -361,14 +324,49 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
         return functor_(thing1_(t));
     }
 
+};
+
+template <typename Func, typename Thing1, typename Thing2>
+struct LazyFunction<Func, Thing1, Thing2, Nothing>
+{
+    Func functor_;
+    Thing1 thing1_;
+    Thing2 thing2_;
+
+    typedef Func functor_type;
+
+    LazyFunction(Func functor, Thing1 thing1, Thing2 thing2) 
+        : functor_(functor), thing1_(thing1), thing2_(thing2) {}
+
+    template <typename T, typename U, typename V>
     typename ResultOf<
-        curry(LazyFunction)
-    >::type operator()() const
+        Func(typename ResultOf<Thing1(T, U, V)>::type,
+             typename ResultOf<Thing2(T, U, V)>::type)
+    >::type operator()(const T &t, const U &u, const V &v) const
     {
-        return curry()(*this);
+        return functor_(thing1_(t, u, v), thing2_(t, u, v));
+    }
+
+    template <typename T, typename U>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U)>::type,
+             typename ResultOf<Thing2(T, U)>::type)
+    >::type operator()(const T &t, const U &u) const
+    {
+        return functor_(thing1_(t, u), thing2_(t, u));
+    }
+
+    template <typename T>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T)>::type,
+             typename ResultOf<Thing2(T)>::type)
+    >::type operator()(const T &t) const
+    {
+        return functor_(thing1_(t), thing2_(t));
     }
 
 };
+
 
 template <typename T>
 struct Converter
@@ -410,6 +408,27 @@ struct Function
         typedef typename Converter<T>::type converter;
         return LazyFunction<Func, converter>(functor_, converter(t));
     }
+
+    template <typename T, typename U>
+    LazyFunction<Func, typename Converter<T>::type, typename Converter<U>::type>
+        operator()(const T &t, const U &u) const
+    {
+        typedef typename Converter<T>::type converter1;
+        typedef typename Converter<U>::type converter2;
+        return LazyFunction<Func, converter1, converter2>(
+            functor_, converter1(t), converter2(u));
+    }
+
+    template <typename T, typename U, typename V>
+    LazyFunction<Func, typename Converter<T>::type, typename Converter<U>::type,
+        typename Converter<V>::type> operator()(const T &t, const U &u, const V &v) const
+    {
+        typedef typename Converter<T>::type converter1;
+        typedef typename Converter<U>::type converter2;
+        typedef typename Converter<V>::type converter3;
+        return LazyFunction<Func, converter1, converter2, converter3>(
+            functor_, converter1(t), converter2(u), converter3(v));
+    }
 };
 
 struct Identity_impl
@@ -421,10 +440,42 @@ struct Identity_impl
     }
 };
 
+struct Add_impl
+{
+    template <typename T>
+    T add(const T &a, const T&b) const
+    {
+        return a + b;
+    }
+};
+
+struct Sub_impl
+{
+    template <typename T>
+    T sub(const T &a, const T &b) const
+    {
+        return a - b;
+    }
+};
+
 template <typename T>
 struct ResultOf<Identity_impl(T)>
 {
     typedef T type;
 };
 
+template <typename T>
+struct ResultOf<Add_impl(T, T)>
+{
+    typedef T type;
+};
+
+template <typename T>
+struct ResultOf<Sub_impl(T, T)>
+{
+    typedef T type;
+};
+
 const Function<Identity_impl> Identity;
+const Function<Add_impl> Add;
+const Function<Sub_impl> Sub;
