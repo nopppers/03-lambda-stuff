@@ -270,33 +270,7 @@ template <typename Func>
 struct LazyFunction<Func, Nothing, Nothing, Nothing>
 {
     Func functor_;
-
     LazyFunction(Func functor) : functor_(functor) {}
-
-    template <typename T, typename U, typename V>
-    typename ResultOf<Func(T, U, V)>::type operator()(const T &t, const U &u, const V &v) const
-    {
-        return functor_(t, u, v);
-    }
-
-    template <typename T, typename U>
-    typename ResultOf<Func(T, U)>::type operator()(const T &t, const U &u) const
-    {
-        return functor_(t, u);
-    }
-
-    template <typename T>
-    typename ResultOf<Func(T)>::type operator()(const T &t) const
-    {
-        return functor_(t);
-    }
-
-    template <typename T>
-    // hmm... that T shouldn't be there...
-    typename ResultOf<Func()>::type operator()() const
-    {
-        return functor_();
-    }
 };
 
 template <typename Func, typename Thing1>
@@ -312,7 +286,7 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
         Func(typename ResultOf<Thing1(T, U, V)>::type, U, V)
     >::type operator()(const T &t, const U &u, const V &v) const
     {
-        return functor_(thing1_(t, u, v), u, v);
+        return functor_(thing1_(t, u, v));
     }
 
     template <typename T, typename U>
@@ -320,7 +294,7 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
         Func(typename ResultOf<Thing1(T, U)>::type, U)
     >::type operator()(const T &t, const U &u) const
     {
-        return functor_(thing1_(t, u), u);
+        return functor_(thing1_(t, u));
     }
 
     template <typename T>
@@ -329,12 +303,6 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
     >::type operator()(const T &t) const
     {
         return functor_(thing1_(t));
-    }
-
-    // hmm... that T shouldn't be there...
-    typename ResultOf<Func(Nothing)>::type operator()() const
-    {
-        return functor_();
     }
 
 };
@@ -352,7 +320,6 @@ struct Function
 
     LazyFunction<Func> operator()() const
     {
-        // Return a functor that can be called directly with the full args
         return LazyFunction<Func>(functor_);
     }
 
