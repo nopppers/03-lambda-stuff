@@ -166,6 +166,8 @@ struct Arg
 template <>
 struct Arg<1>
 {
+    Arg(){}
+
     template <typename T, typename U, typename V>
     T operator()(const T &t, const U &u, const V &v) const
     {
@@ -188,6 +190,8 @@ struct Arg<1>
 template <>
 struct Arg<2>
 {
+    Arg(){}
+
     template <typename T, typename U, typename V>
     U operator()(const T &t, const U &u, const V &v) const
     {
@@ -204,6 +208,8 @@ struct Arg<2>
 template <>
 struct Arg<3>
 {
+    Arg(){}
+
     template <typename T, typename U, typename V>
     V operator()(const T &t, const U &u, const V &v) const
     {
@@ -437,7 +443,7 @@ struct Function
 template <typename Func, typename T>
 struct ResultOf<Function<Func>(T)>
 {
-    typedef typename LazyFunction<Func, typename Converter<T>::type> type; 
+    typedef LazyFunction<Func, typename Converter<T>::type> type; 
 };
 
 template <typename Func, typename T, typename U>

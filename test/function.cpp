@@ -12,6 +12,6 @@ TEST_CASE("functions")
     REQUIRE(Eq(2, 2)(nullptr) == true);
     REQUIRE(Eq(arg2, 2)(2, 1) == false);
     REQUIRE(Eq(Add(arg1, arg2), Add(arg2, arg1))(2, 3) == true);
-    //REQUIRE(Add(Sub(arg1, 1), Sub(arg2, 3))(5, 6) == 7);
+    REQUIRE(Add(Sub(arg1, 1), Sub(arg2, 3))(5, 6) == 7);
 }
 
