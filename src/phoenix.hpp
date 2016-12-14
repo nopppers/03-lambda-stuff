@@ -293,7 +293,7 @@ struct LazyFunction<Func, Nothing, Nothing, Nothing>
 
     template <typename T>
     // hmm... that T shouldn't be there...
-    typename ResultOf<Func(T)>::type operator()() const
+    typename ResultOf<Func()>::type operator()() const
     {
         return functor_();
     }
