@@ -276,8 +276,6 @@ struct ResultOf<Arg<argN>(T)>
 ///////////////////////////////////
 // Function
 ///////////////////////////////////
-
-
 template <typename Func, typename Arg1 = Nothing, typename Arg2 = Nothing, typename Arg3 = Nothing>
 struct LazyFunction
 {
@@ -367,7 +365,6 @@ struct LazyFunction<Func, Thing1, Thing2, Nothing>
 
 };
 
-
 template <typename T>
 struct Converter
 {
@@ -437,6 +434,32 @@ struct Function
     }
 };
 
+template <typename Func, typename T>
+struct ResultOf<Function<Func>(T)>
+{
+    typedef typename LazyFunction<Func, typename Converter<T>::type> type; 
+};
+
+template <typename Func, typename T, typename U>
+struct ResultOf<Function<Func>(T, U)>
+{
+    typedef typename LazyFunction<Func, 
+        typename Converter<T>::type,
+        typename Converter<U>::type> type;
+};
+
+template <typename Func, typename T, typename U, typename V>
+struct ResultOf<Function<Func>(T, U, V)>
+{
+    typedef typename LazyFunction<Func,
+        typename Converter<T>::type,
+        typename Converter<U>::type,
+        typename Converter<V>::type> type;
+};
+
+///////////////////////////////////
+// Compatible Functors
+///////////////////////////////////
 struct Identity_impl
 {
     template <typename T>
@@ -501,3 +524,4 @@ const Function<Identity_impl> Identity;
 const Function<Add_impl> Add;
 const Function<Sub_impl> Sub;
 const Function<Eq_impl> Eq;
+
