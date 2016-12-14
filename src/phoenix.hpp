@@ -614,7 +614,7 @@ struct Add_impl
 struct AddTo_impl
 {
     template <typename T>
-    T operator()(const T &a, const T &b)
+    T operator()(const T &a, const T &b) const
     {
         return a += b;
     }
