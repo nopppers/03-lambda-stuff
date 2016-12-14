@@ -392,6 +392,12 @@ struct Converter<Arg<I> >
     typedef Arg<I> type;
 };
 
+template <typename Func, typename T, typename U, typename V>
+struct Converter<LazyFunction<Func, T, U, V> >
+{
+    typedef LazyFunction<Func, T, U, V> type;
+};
+
 template <typename Func>
 struct Function
 {
@@ -458,6 +464,15 @@ struct Sub_impl
     }
 };
 
+struct Eq_impl
+{
+    template <typename T, typename U>
+    bool operator()(const T &a, const U &b) const
+    {
+        return a == b;
+    }
+};
+
 template <typename T>
 struct ResultOf<Identity_impl(T)>
 {
@@ -476,6 +491,13 @@ struct ResultOf<Sub_impl(T, T)>
     typedef T type;
 };
 
+template <typename T, typename U>
+struct ResultOf<Eq_impl(T, U)>
+{
+    typedef bool type;
+};
+
 const Function<Identity_impl> Identity;
 const Function<Add_impl> Add;
 const Function<Sub_impl> Sub;
+const Function<Eq_impl> Eq;
