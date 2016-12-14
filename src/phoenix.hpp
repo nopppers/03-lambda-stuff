@@ -449,7 +449,7 @@ struct ResultOf<Function<Func>(T)>
 template <typename Func, typename T, typename U>
 struct ResultOf<Function<Func>(T, U)>
 {
-    typedef typename LazyFunction<Func, 
+    typedef LazyFunction<Func, 
         typename Converter<T>::type,
         typename Converter<U>::type> type;
 };
@@ -457,7 +457,7 @@ struct ResultOf<Function<Func>(T, U)>
 template <typename Func, typename T, typename U, typename V>
 struct ResultOf<Function<Func>(T, U, V)>
 {
-    typedef typename LazyFunction<Func,
+    typedef LazyFunction<Func,
         typename Converter<T>::type,
         typename Converter<U>::type,
         typename Converter<V>::type> type;
