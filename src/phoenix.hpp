@@ -22,7 +22,7 @@ struct false_type
 template <typename F>
 struct ResultOf
 {
-    typedef Nothing no_type;
+    typedef Nothing type;
 };
 
 ///////////////////////////////////
@@ -67,7 +67,7 @@ Val<T> val(const T &v)
 }
 
 template <typename T>
-struct ResultOf<Val<T>()>
+struct ResultOf<Val<T> >
 {
     typedef T type;
 };
@@ -132,7 +132,7 @@ Ref<T> ref(T &r)
 }
 
 template <typename T>
-struct ResultOf<Ref<T>()>
+struct ResultOf<Ref<T> >
 {
     typedef T& type;
 };
@@ -290,12 +290,8 @@ struct LazyFunction<Func, Nothing, Nothing, Nothing>
     LazyFunction(Func functor) : functor_(functor) {}
 };
 
-template <typename LazyFunction, typename SFINAE = void>
+template <typename LazyFunction, typename Selector>
 struct Curry
-{};
-
-template <typename LazyFunction>
-struct Curry<LazyFunction, typename ResultOf<typename LazyFunction::functor_type>::type>
 {
     typedef typename ResultOf<typename LazyFunction::functor_type>::type Ret;
     typedef Ret result_type;
@@ -307,7 +303,7 @@ struct Curry<LazyFunction, typename ResultOf<typename LazyFunction::functor_type
 };
 
 template <typename LazyFunction>
-struct Curry<LazyFunction, typename ResultOf<typename Lazyfunction::functor_type>::no_type>
+struct Curry<LazyFunction, Nothing>
 {
     typedef LazyFunction result_type;
 
@@ -317,12 +313,17 @@ struct Curry<LazyFunction, typename ResultOf<typename Lazyfunction::functor_type
     }
 };
 
-template <typename LazyFunction, typename SFINAE>
-struct ResultOf<Curry<LazyFunction, SFINAE>(LazyFunction)>
+template <typename LazyFunction, typename Selector>
+struct ResultOf<Curry<LazyFunction, Selector>(LazyFunction)>
 {
-    typedef typename Curry<LazyFunction, SFINAE>::result_type type;
+    typedef typename Curry<LazyFunction, Selector>::result_type type;
 };
 
+template <typename LazyFunction>
+struct ResultOf<Curry<LazyFunction, Nothing>(LazyFunction)>
+{
+    typedef typename Curry<LazyFunction, Nothing>::result_type type;
+};
 
 template <typename Func, typename Thing1>
 struct LazyFunction<Func, Thing1, Nothing, Nothing>
@@ -332,6 +333,7 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
 
     typedef Func functor_type;
     typedef Thing1 thing1_type;
+    typedef Curry<const LazyFunction, typename ResultOf<Func>::type> curry;
 
     LazyFunction(Func functor, Thing1 thing1) : functor_(functor), thing1_(thing1) {}
 
@@ -360,10 +362,10 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
     }
 
     typename ResultOf<
-        Func(typename ResultOf<Thing1>::type)
+        curry(LazyFunction)
     >::type operator()() const
     {
-        return functor_();
+        return curry()(*this);
     }
 
 };
