@@ -18,6 +18,7 @@ template <typename T>
 struct Val
 {
     Val(const T &v) : value_(v) {}
+    Val(const Val &v) : value_(v.value_) {}
     
     T operator()() const
     {
@@ -82,6 +83,8 @@ template <typename T>
 struct Ref
 {
     Ref(T &r) : ref_(r) {}
+    Ref(const Ref &r) : ref_(r.ref_) {}
+
     T& operator()() const
     {
         return ref_;
@@ -310,7 +313,25 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
 template <typename T>
 struct Converter
 {
+    typedef Val<T> type;
+};
 
+template <typename T>
+struct Converter<Val<T>>
+{
+    typedef Val<T> type;
+};
+
+template <typename T>
+struct Converter<Ref<T>>
+{
+    typedef Ref<T> type;
+};
+
+template <size_t I>
+struct Converter<Arg<I>>
+{
+    typedef Arg<I> type;
 };
 
 template <typename Func>
@@ -326,7 +347,8 @@ struct Function
     template <typename T>
     LazyFunction<Func, T> operator()(const T &t) const
     {
-        return LazyFunction<Func, T>(functor_, t);
+        typedef typename Converter<T>::type converter;
+        return LazyFunction<Func, T>(functor_, converter(t));
     }
 };
 
