@@ -283,9 +283,7 @@ struct ResultOf<Arg<argN>(T)>
 // Function
 ///////////////////////////////////
 template <typename Func, typename Arg1 = Nothing, typename Arg2 = Nothing, typename Arg3 = Nothing>
-struct LazyFunction
-{
-};
+struct LazyFunction;
 
 template <typename Func>
 struct LazyFunction<Func, Nothing, Nothing, Nothing>
@@ -370,6 +368,52 @@ struct LazyFunction<Func, Thing1, Thing2, Nothing>
     }
 
 };
+
+template <typename Func, typename Thing1, typename Thing2, typename Thing3>
+struct LazyFunction
+{
+    Func functor_;
+    Thing1 thing1_;
+    Thing2 thing2_;
+    Thing3 thing3_;
+
+    typedef Func functor_type;
+
+    LazyFunction(Func functor, Thing1 thing1, Thing2 thing2, Thing3 thing3)
+        : functor_(functor), thing1_(thing1), thing2_(thing2), thing3_(thing3) {}
+
+    template <typename T, typename U, typename V>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V)>::type,
+             typename ResultOf<Thing2(T, U, V)>::type,
+             typename ResultOf<Thing3(T, U, V)>::type)
+    >::type operator()(const T &t, const U &u, const V &v) const
+    {
+        return functor_(thing1_(t, u, v), thing2_(t, u, v), thing3_(t, u, v));
+    }
+
+    template <typename T, typename U>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U)>::type,
+             typename ResultOf<Thing2(T, U)>::type,
+             typename ResultOf<Thing3(T, U)>::type)
+    >::type operator()(const T &t, const U &u) const
+    {
+        return functor_(thing1_(t, u), thing2_(t, u), thing3_(t, u));
+    }
+
+    template <typename T>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T)>::type,
+             typename ResultOf<Thing2(T)>::type,
+             typename ResultOf<Thing3(T)>::type)
+    >::type operator()(const T &t) const
+    {
+        return functor_(thing1_(t), thing2_(t), thing3_(t));
+    }
+
+};
+
 
 template <typename T>
 struct Converter
@@ -516,6 +560,36 @@ struct ResultOf<LazyFunction<Func, Thing1, Thing2>(T, U, V)>
             >::type type;
 };
 
+template <typename Func, typename Thing1, typename Thing2, typename Thing3, typename T>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2, Thing3>(T)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T)>::type,
+             typename ResultOf<Thing2(T)>::type,
+             typename ResultOf<Thing3(T)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename Thing2, typename Thing3, typename T, typename U>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2, Thing3>(T, U)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U)>::type,
+             typename ResultOf<Thing2(T, U)>::type,
+             typename ResultOf<Thing3(T, U)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename Thing2, typename Thing3, typename T, typename U, typename V>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2, Thing3>(T, U, V)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V)>::type,
+             typename ResultOf<Thing2(T, U, V)>::type,
+             typename ResultOf<Thing3(T, U, V)>::type)
+            >::type type;
+};
+
 ///////////////////////////////////
 // Compatible Functors
 ///////////////////////////////////
@@ -546,6 +620,24 @@ struct Sub_impl
     }
 };
 
+struct Mul_impl
+{
+    template <typename T>
+    T operator()(const T &a, const T &b) const
+    {
+        return a * b;
+    }
+};
+
+struct MAdd_impl
+{
+    template <typename T>
+    T operator()(const T &a, const T &b, const T &c) const
+    {
+        return a*b + c;
+    }
+};
+
 struct Eq_impl
 {
     template <typename T, typename U>
@@ -573,6 +665,12 @@ struct ResultOf<Sub_impl(T, T)>
     typedef T type;
 };
 
+template <typename T>
+struct ResultOf<MAdd_impl(T, T, T)>
+{
+    typedef T type;
+};
+
 template <typename T, typename U>
 struct ResultOf<Eq_impl(T, U)>
 {
@@ -582,5 +680,7 @@ struct ResultOf<Eq_impl(T, U)>
 const Function<Identity_impl> Identity;
 const Function<Add_impl> Add;
 const Function<Sub_impl> Sub;
+const Function<Mul_impl> Mul;
+const Function<MAdd_impl> MAdd;
 const Function<Eq_impl> Eq;
 
