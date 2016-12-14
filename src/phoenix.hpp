@@ -6,10 +6,24 @@ struct Nothing
 };
 
 ///////////////////////////////////
+// Bools
+///////////////////////////////////
+struct true_type
+{
+};
+
+struct false_type
+{
+};
+
+///////////////////////////////////
 // Result Of
 ///////////////////////////////////
 template <typename F>
-struct ResultOf {};
+struct ResultOf
+{
+    typedef Nothing no_type;
+};
 
 ///////////////////////////////////
 // Val
@@ -276,11 +290,48 @@ struct LazyFunction<Func, Nothing, Nothing, Nothing>
     LazyFunction(Func functor) : functor_(functor) {}
 };
 
+template <typename LazyFunction, typename SFINAE = void>
+struct Curry
+{};
+
+template <typename LazyFunction>
+struct Curry<LazyFunction, typename ResultOf<typename LazyFunction::functor_type>::type>
+{
+    typedef typename ResultOf<typename LazyFunction::functor_type>::type Ret;
+    typedef Ret result_type;
+
+    Ret operator()(LazyFunction func)
+    {
+        return func.functor_();
+    }
+};
+
+template <typename LazyFunction>
+struct Curry<LazyFunction, typename ResultOf<typename Lazyfunction::functor_type>::no_type>
+{
+    typedef LazyFunction result_type;
+
+    LazyFunction operator()(LazyFunction func)
+    {
+        return func;
+    }
+};
+
+template <typename LazyFunction, typename SFINAE>
+struct ResultOf<Curry<LazyFunction, SFINAE>(LazyFunction)>
+{
+    typedef typename Curry<LazyFunction, SFINAE>::result_type type;
+};
+
+
 template <typename Func, typename Thing1>
 struct LazyFunction<Func, Thing1, Nothing, Nothing>
 {
     Func functor_;
     Thing1 thing1_;
+
+    typedef Func functor_type;
+    typedef Thing1 thing1_type;
 
     LazyFunction(Func functor, Thing1 thing1) : functor_(functor), thing1_(thing1) {}
 
@@ -308,6 +359,13 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
         return functor_(thing1_(t));
     }
 
+    typename ResultOf<
+        Func(typename ResultOf<Thing1>::type)
+    >::type operator()() const
+    {
+        return functor_();
+    }
+
 };
 
 template <typename T>
@@ -317,19 +375,19 @@ struct Converter
 };
 
 template <typename T>
-struct Converter<Val<T>>
+struct Converter<Val<T> >
 {
     typedef Val<T> type;
 };
 
 template <typename T>
-struct Converter<Ref<T>>
+struct Converter<Ref<T> >
 {
     typedef Ref<T> type;
 };
 
 template <size_t I>
-struct Converter<Arg<I>>
+struct Converter<Arg<I> >
 {
     typedef Arg<I> type;
 };
@@ -345,10 +403,10 @@ struct Function
     }
 
     template <typename T>
-    LazyFunction<Func, T> operator()(const T &t) const
+    LazyFunction<Func, typename Converter<T>::type> operator()(const T &t) const
     {
         typedef typename Converter<T>::type converter;
-        return LazyFunction<Func, T>(functor_, converter(t));
+        return LazyFunction<Func, converter>(functor_, converter(t));
     }
 };
 

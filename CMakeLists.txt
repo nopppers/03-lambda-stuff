@@ -22,4 +22,6 @@ add_executable(phoenix-test
     ${PHOENIX_SRC}
 )
 
+set_property(TARGET phoenix-test PROPERTY CXX_STANDARD 98)
+
 add_test(phoenix-tests phoenix-test)
