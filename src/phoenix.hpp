@@ -614,7 +614,7 @@ struct Add_impl
 struct AddTo_impl
 {
     template <typename T>
-    T operator()(const T &a, const T &b) const
+    T& operator()(T &a, const T &b) const
     {
         return a += b;
     }
@@ -680,7 +680,7 @@ struct ResultOf<Add_impl(T, T)>
 template <typename T>
 struct ResultOf<AddTo_impl(T, T)>
 {
-    typedef T type;
+    typedef T& type;
 };
 
 template <typename T>
