@@ -406,6 +406,8 @@ struct Function
 {
     Func functor_;
 
+    Function() {}
+
     LazyFunction<Func> operator()() const
     {
         return LazyFunction<Func>(functor_);
