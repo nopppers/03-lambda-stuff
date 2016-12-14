@@ -647,6 +647,15 @@ struct Eq_impl
     }
 };
 
+struct Length_impl
+{
+    template <typename T>
+    size_t operator()(const T &a) const
+    {
+        return a.length();
+    }
+};
+
 template <typename T>
 struct ResultOf<Identity_impl(T)>
 {
@@ -677,10 +686,16 @@ struct ResultOf<Eq_impl(T, U)>
     typedef bool type;
 };
 
+template <typename T>
+struct ResultOf<Length_impl(T)>
+{
+    typedef size_t type;
+};
+
 const Function<Identity_impl> Identity;
 const Function<Add_impl> Add;
 const Function<Sub_impl> Sub;
 const Function<Mul_impl> Mul;
 const Function<MAdd_impl> MAdd;
 const Function<Eq_impl> Eq;
-
+const Function<Length_impl> Length;
