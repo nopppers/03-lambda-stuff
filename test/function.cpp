@@ -26,5 +26,20 @@ TEST_CASE("functions")
     int a = 2;
     REQUIRE(AddTo(ref(a), arg1)(1) == 3);
     REQUIRE(a == 3);
+
+    std::vector<int> testVec;
+    std::back_insert_iterator<std::vector<int> > out(testVec);
+    std::vector<int> expected;
+    testVec.push_back(1);
+    testVec.push_back(2);
+    testVec.push_back(3);
+    expected.push_back(1);
+    expected.push_back(2);
+    expected.push_back(3);
+    expected.push_back(2);
+    expected.push_back(4);
+    expected.push_back(6);
+    Transform(Begin(arg1), End(arg1), arg2, Mul(arg1, 2))(testVec, out);
+    REQUIRE(testVec == expected);
 }
 

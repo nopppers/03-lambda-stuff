@@ -811,3 +811,6 @@ const Function<NotEq_impl> NotEq;
 const Function<Length_impl> Length;
 const Function<Substr_impl> Substr;
 const Function<Find_impl> Find;
+const Function<Transform_impl> Transform;
+const Function<Begin_impl> Begin;
+const Function<End_impl> End;
