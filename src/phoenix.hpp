@@ -40,19 +40,19 @@ struct Val
     }
 
     template <typename U>
-    T operator()(const U &u) const
+    T operator()(const U &) const
     {
         return value_;
     }
 
     template <typename U, typename V>
-    T operator()(const U &u, const V &v) const
+    T operator()(const U &, const V &) const
     {
         return value_;
     }
 
     template <typename U, typename V, typename Z>
-    T operator()(const U &u, const V &v, const Z &z) const
+    T operator()(const U &, const V &, const Z &) const
     {
         return value_;
     }
@@ -105,19 +105,19 @@ struct Ref
     }
 
     template <typename U>
-    T& operator()(const U &u) const
+    T& operator()(const U &) const
     {
         return ref_;
     }
 
     template <typename U, typename V>
-    T& operator()(const U &u, const V &v) const
+    T& operator()(const U &, const V &) const
     {
         return ref_;
     }
 
     template <typename U, typename V, typename Z>
-    T& operator()(const U &u, const V &v, const Z &z) const
+    T& operator()(const U &, const V &, const Z &) const
     {
         return ref_;
     }
@@ -169,13 +169,13 @@ struct Arg<1>
     Arg(){}
 
     template <typename T, typename U, typename V>
-    T operator()(const T &t, const U &u, const V &v) const
+    T operator()(const T &t, const U &, const V &) const
     {
         return t;
     }
 
     template <typename T, typename U>
-    T operator()(const T &t, const U &u) const
+    T operator()(const T &t, const U &) const
     {
         return t;
     }
@@ -193,13 +193,13 @@ struct Arg<2>
     Arg(){}
 
     template <typename T, typename U, typename V>
-    U operator()(const T &t, const U &u, const V &v) const
+    U operator()(const T &, const U &u, const V &) const
     {
         return u;
     }
 
     template <typename T, typename U>
-    U operator()(const T &t, const U &u) const
+    U operator()(const T &, const U &u) const
     {
         return u;
     }
@@ -211,7 +211,7 @@ struct Arg<3>
     Arg(){}
 
     template <typename T, typename U, typename V>
-    V operator()(const T &t, const U &u, const V &v) const
+    V operator()(const T &, const U &, const V &v) const
     {
         return v;
     }
