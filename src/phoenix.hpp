@@ -604,8 +604,8 @@ struct Identity_impl
 
 struct Add_impl
 {
-    template <typename T>
-    T operator()(const T &a, const T &b) const
+    template <typename T, typename U>
+    T operator()(const T &a, const U &b) const
     {
         return a + b;
     }
@@ -671,8 +671,8 @@ struct ResultOf<Identity_impl(T)>
     typedef T type;
 };
 
-template <typename T>
-struct ResultOf<Add_impl(T, T)>
+template <typename T, typename U>
+struct ResultOf<Add_impl(T, U)>
 {
     typedef T type;
 };
