@@ -60,6 +60,12 @@ struct Val
         return value_;
     }
 
+    template <typename U, typename V, typename Z, typename A>
+    T operator()(const U &, const V &, const Z &, const A &) const
+    {
+        return value_;
+    }
+
     T value_;
 };
 
@@ -93,6 +99,12 @@ struct ResultOf<Val<T>(U, V, Z)>
     typedef T type;
 };
 
+template <typename T, typename U, typename V, typename Z, typename A>
+struct ResultOf<Val<T>(U, V, Z, A)>
+{
+    typedef T type;
+};
+
 ///////////////////////////////////
 // Ref
 ///////////////////////////////////
@@ -121,6 +133,12 @@ struct Ref
 
     template <typename U, typename V, typename Z>
     T& operator()(const U &, const V &, const Z &) const
+    {
+        return ref_;
+    }
+
+    template <typename U, typename V, typename Z, typename A>
+    T& operator()(const U &, const V &, const Z &, const A &) const
     {
         return ref_;
     }
@@ -158,6 +176,12 @@ struct ResultOf<Ref<T>(U, V, Z)>
     typedef T& type;
 };
 
+template <typename T, typename U, typename V, typename Z, typename A>
+struct ResultOf<Ref<T>(U, V, Z, A)>
+{
+    typedef T& type;
+};
+
 ///////////////////////////////////
 // Arg
 ///////////////////////////////////
@@ -170,6 +194,12 @@ template <>
 struct Arg<1>
 {
     Arg(){}
+
+    template <typename T, typename U, typename V, typename Z>
+    T operator()(const T &t, const U &u, const V &v, const Z &z)
+    {
+        return t;
+    }
 
     template <typename T, typename U, typename V>
     T operator()(const T &t, const U &, const V &) const
@@ -195,6 +225,12 @@ struct Arg<2>
 {
     Arg(){}
 
+    template <typename T, typename U, typename V, typename Z>
+    U operator()(const T &, const U &u, const V &, typename Z &) const
+    {
+        return u;
+    }
+
     template <typename T, typename U, typename V>
     U operator()(const T &, const U &u, const V &) const
     {
@@ -213,6 +249,12 @@ struct Arg<3>
 {
     Arg(){}
 
+    template <typename T, typename U, typename V, typename Z>
+    V operator()(const T &, const U &, const V &v, const Z &) const
+    {
+        return v;
+    }
+
     template <typename T, typename U, typename V>
     V operator()(const T &, const U &, const V &v) const
     {
@@ -220,13 +262,50 @@ struct Arg<3>
     }
 };
 
+template <>
+struct Arg<4>
+{
+    Arg(){}
+
+    template <typename T, typename U, typename V, typename Z>
+    Z operator()(const T &, const U &u, const V &, const Z &z)
+    {
+        return z;
+    }
+};
+
 const Arg<1> arg1;
 const Arg<2> arg2;
 const Arg<3> arg3;
+const Arg<4> arg4;
 
-template <size_t I, typename T, typename U = Nothing, typename V = Nothing>
+template <size_t I, typename T, typename U = Nothing, typename V = Nothing, typename Z = Nothing>
 struct ArgReturnType
 {};
+
+template <typename T, typename U, typename V, typename Z>
+struct ArgReturnType<1, T, U, V, Z>
+{
+    typedef T type;
+};
+
+template <typename T, typename U, typename V, typename Z>
+struct ArgReturnType<2, T, U, V, Z>
+{
+    typedef U type;
+};
+
+template <typename T, typename U, typename V, typename Z>
+struct ArgReturnType<3, T, U, V, Z>
+{
+    typedef V type;
+};
+
+template <typename T, typename U, typename V, typename Z>
+struct ArgReturnType<4, T, U, V, Z>
+{
+    typedef Z type;
+};
 
 template <typename T, typename U, typename V>
 struct ArgReturnType<1, T, U, V>
@@ -264,6 +343,12 @@ struct ArgReturnType<1, T>
     typedef T type;
 };
 
+template <size_t argN, typename T, typename U, typename V, typename Z>
+struct ResultOf<Arg<argN>(T, U, V, Z)>
+{
+    typedef typename ArgReturnType<argN, T, U, V, Z>::type type;
+};
+
 template <size_t argN, typename T, typename U, typename V>
 struct ResultOf<Arg<argN>(T, U, V)>
 {
@@ -285,18 +370,18 @@ struct ResultOf<Arg<argN>(T)>
 ///////////////////////////////////
 // Function
 ///////////////////////////////////
-template <typename Func, typename Arg1 = Nothing, typename Arg2 = Nothing, typename Arg3 = Nothing>
+template <typename Func, typename Arg1 = Nothing, typename Arg2 = Nothing, typename Arg3 = Nothing, typename Arg4 = Nothing>
 struct LazyFunction;
 
 template <typename Func>
-struct LazyFunction<Func, Nothing, Nothing, Nothing>
+struct LazyFunction<Func, Nothing, Nothing, Nothing, Nothing>
 {
     Func functor_;
     LazyFunction(Func functor) : functor_(functor) {}
 };
 
 template <typename Func, typename Thing1>
-struct LazyFunction<Func, Thing1, Nothing, Nothing>
+struct LazyFunction<Func, Thing1, Nothing, Nothing, Nothing>
 {
     Func functor_;
     Thing1 thing1_;
@@ -304,6 +389,14 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
     typedef Func functor_type;
 
     LazyFunction(Func functor, Thing1 thing1) : functor_(functor), thing1_(thing1) {}
+
+    template <typename T, typename U, typename V, typename Z>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V, Z)>::type)
+    >::type operator()(const T &t, const U &u, const V &v, const Z &z) const
+    {
+        return functor_(thing1_(t, u, v, z));
+    }
 
     template <typename T, typename U, typename V>
     typename ResultOf<
@@ -332,7 +425,7 @@ struct LazyFunction<Func, Thing1, Nothing, Nothing>
 };
 
 template <typename Func, typename Thing1, typename Thing2>
-struct LazyFunction<Func, Thing1, Thing2, Nothing>
+struct LazyFunction<Func, Thing1, Thing2, Nothing, Nothing>
 {
     Func functor_;
     Thing1 thing1_;
@@ -342,6 +435,15 @@ struct LazyFunction<Func, Thing1, Thing2, Nothing>
 
     LazyFunction(Func functor, Thing1 thing1, Thing2 thing2) 
         : functor_(functor), thing1_(thing1), thing2_(thing2) {}
+
+    template <typename T, typename U, typename V, typename Z>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V, Z)>::type,
+             typename ResultOf<Thing2(T, U, V, Z)>::type)
+    >::type operator()(const T &t, const U &u, const V &v, const Z &z) const
+    {
+        return functor_(thing1_(t, u, v, z), thing2_(t, u, v, z));
+    }
 
     template <typename T, typename U, typename V>
     typename ResultOf<
@@ -373,7 +475,7 @@ struct LazyFunction<Func, Thing1, Thing2, Nothing>
 };
 
 template <typename Func, typename Thing1, typename Thing2, typename Thing3>
-struct LazyFunction
+struct LazyFunction<Func, Thing1, Thing2, Thing3, Nothing>
 {
     Func functor_;
     Thing1 thing1_;
@@ -384,6 +486,16 @@ struct LazyFunction
 
     LazyFunction(Func functor, Thing1 thing1, Thing2 thing2, Thing3 thing3)
         : functor_(functor), thing1_(thing1), thing2_(thing2), thing3_(thing3) {}
+
+    template <typename T, typename U, typename V, typename Z>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V, Z)>::type,
+             typename ResultOf<Thing2(T, U, V, Z)>::type,
+             typename ResultOf<Thing3(T, U, V, Z)>::type)
+    >::type operator()(const T &t, const U &u, const V &v, const Z &z) const
+    {
+        return functor_(thing1_(t, u, v, z), thing2_(t, u, v, z), thing3_(t, u, v, z));
+    }
 
     template <typename T, typename U, typename V>
     typename ResultOf<
@@ -417,6 +529,77 @@ struct LazyFunction
 
 };
 
+template <typename Func, typename Thing1, typename Thing2, typename Thing3, typename Thing4>
+struct LazyFunction
+{
+    Func functor_;
+    Thing1 thing1_;
+    Thing2 thing2_;
+    Thing3 thing3_;
+    Thing4 thing4_;
+
+    typedef Func functor_type;
+
+    LazyFunction(Func functor, Thing1 thing1, Thing2 thing2, Thing3 thing3, Thing4 thing4)
+        : functor_(functor), thing1_(thing1), thing2_(thing2), thing3_(thing3), thing4_(thing4) {}
+
+    template <typename T, typename U, typename V, typename Z>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V, Z)>::type,
+             typename ResultOf<Thing2(T, U, V, Z)>::type,
+             typename ResultOf<Thing3(T, U, V, Z)>::type,
+             typename ResultOf<Thing4(T, U, V, Z)>::type)
+    >::type operator()(const T &t, const U &u, const V &v, const Z &z) const
+    {
+        return functor_(thing1_(t, u, v, z), 
+                        thing2_(t, u, v, z), 
+                        thing3_(t, u, v, z),
+                        thing4_(t, u, v, z));
+    }
+
+    template <typename T, typename U, typename V>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V)>::type,
+             typename ResultOf<Thing2(T, U, V)>::type,
+             typename ResultOf<Thing3(T, U, V)>::type,
+             typename ResultOf<Thing4(T, U, V)>::type)
+    >::type operator()(const T &t, const U &u, const V &v) const
+    {
+        return functor_(thing1_(t, u, v),
+                        thing2_(t, u, v),
+                        thing3_(t, u, v),
+                        thing4_(t, u, v));
+    }
+
+    template <typename T, typename U>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U)>::type,
+             typename ResultOf<Thing2(T, U)>::type,
+             typename ResultOf<Thing4(T, U)>::type,
+             typename ResultOf<Thing4(T, U)>::type)
+    >::type operator()(const T &t, const U &u) const
+    {
+        return functor_(thing1_(t, u),
+                        thing2_(t, u),
+                        thing3_(t, u),
+                        thing4_(t, u));
+    }
+
+    template <typename T>
+    typename ResultOf<
+        Func(typename ResultOf<Thing1(T)>::type,
+             typename ResultOf<Thing2(T)>::type,
+             typename ResultOf<Thing3(T)>::type,
+             typename ResultOf<Thing4(T)>::type)
+    >::type operator()(const T &t) const
+    {
+        return functor_(thing1_(t),
+                        thing2_(t), 
+                        thing3_(t),
+                        thing4_(t));
+    }
+};
+
 
 template <typename T>
 struct Converter
@@ -442,10 +625,10 @@ struct Converter<Arg<I> >
     typedef Arg<I> type;
 };
 
-template <typename Func, typename T, typename U, typename V>
-struct Converter<LazyFunction<Func, T, U, V> >
+template <typename Func, typename T, typename U, typename V, typename Z>
+struct Converter<LazyFunction<Func, T, U, V, Z> >
 {
-    typedef LazyFunction<Func, T, U, V> type;
+    typedef LazyFunction<Func, T, U, V, Z> type;
 };
 
 template <typename Func>
@@ -487,6 +670,26 @@ struct Function
         return LazyFunction<Func, converter1, converter2, converter3>(
             functor_, converter1(t), converter2(u), converter3(v));
     }
+
+    template <typename T, typename U, typename V, typename Z>
+    LazyFunction<Func,
+                 typename Converter<T>::type,
+                 typename Converter<U>::type,
+                 typename Converter<V>::type,
+                 typename Converter<Z>::type>
+    operator()(const T &t, const U &u, const V &v, typename Z &z) const
+    {
+        typedef typename Converter<T>::type converter1;
+        typedef typename Converter<U>::type converter2;
+        typedef typename Converter<V>::type converter3;
+        typedef typename Converter<Z>::type converter4;
+        return LazyFunction<Func, converter1, converter2, converter3, converter4>(
+            functor_,
+            converter1(t),
+            converter2(u),
+            converter3(v),
+            converter4(z));
+    }
 };
 
 template <typename Func, typename T>
@@ -512,6 +715,16 @@ struct ResultOf<Function<Func>(T, U, V)>
         typename Converter<V>::type> type;
 };
 
+template <typename Func, typename T, typename U, typename V, typename Z>
+struct ResultOf<Function<Func>(T, U, V, Z)>
+{
+    typedef LazyFunction<Func,
+        typename Converter<T>::type,
+        typename Converter<U>::type,
+        typename Converter<V>::type,
+        typename Converter<Z>::type> type;
+};
+
 template <typename Func, typename Thing1, typename T>
 struct ResultOf<LazyFunction<Func, Thing1>(T)>
 {
@@ -533,6 +746,14 @@ struct ResultOf<LazyFunction<Func, Thing1>(T, U, V)>
 {
     typedef typename ResultOf<
         Func(typename ResultOf<Thing1(T, U, V)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename T, typename U, typename V, typename Z>
+struct ResultOf<LazyFunction<Func, Thing1>(T, U, V, Z)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V, Z)>::type)
             >::type type;
 };
 
@@ -560,6 +781,15 @@ struct ResultOf<LazyFunction<Func, Thing1, Thing2>(T, U, V)>
     typedef typename ResultOf<
         Func(typename ResultOf<Thing1(T, U, V)>::type,
              typename ResultOf<Thing2(T, U, V)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename Thing2, typename T, typename U, typename V, typename Z>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2>(T, U, V, Z)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V, Z)>::type,
+             typename ResultOf<Thing2(T, U, V, Z)>::type)
             >::type type;
 };
 
@@ -592,6 +822,61 @@ struct ResultOf<LazyFunction<Func, Thing1, Thing2, Thing3>(T, U, V)>
              typename ResultOf<Thing3(T, U, V)>::type)
             >::type type;
 };
+
+template <typename Func, typename Thing1, typename Thing2, typename Thing3, typename T, typename U, typename V, typename Z>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2, Thing3>(T, U, V, Z)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V, Z)>::type,
+             typename ResultOf<Thing2(T, U, V, Z)>::type,
+             typename ResultOf<Thing3(T, U, V, Z)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename Thing2, typename Thing3, typename Thing4, typename T>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2, Thing3, Thing4>(T)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T)>::type,
+             typename ResultOf<Thing2(T)>::type,
+             typename ResultOf<Thing3(T)>::type,
+             typename ResultOf<Thing4(T)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename Thing2, typename Thing3, typename Thing4, typename T, typename U>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2, Thing3, Thing4>(T, U)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U)>::type,
+             typename ResultOf<Thing2(T, U)>::type,
+             typename ResultOf<Thing3(T, U)>::type,
+             typename ResultOf<Thing4(T, U)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename Thing2, typename Thing3, typename Thing4, typename T, typename U, typename V>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2, Thing3, Thing4>(T, U, V)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V)>::type,
+             typename ResultOf<Thing2(T, U, V)>::type,
+             typename ResultOf<Thing3(T, U, V)>::type,
+             typename ResultOf<Thing4(T, U, V)>::type)
+            >::type type;
+};
+
+template <typename Func, typename Thing1, typename Thing2, typename Thing3, typename Thing4, typename T, typename U, typename V, typename Z>
+struct ResultOf<LazyFunction<Func, Thing1, Thing2, Thing3, Thing4>(T, U, V, Z)>
+{
+    typedef typename ResultOf<
+        Func(typename ResultOf<Thing1(T, U, V, Z)>::type,
+             typename ResultOf<Thing2(T, U, V, Z)>::type,
+             typename ResultOf<Thing3(T, U, V, Z)>::type,
+             typename ResultOf<Thing4(T, U, V, Z)>::type)
+            >::type type;
+};
+
 
 ///////////////////////////////////
 // Compatible Functors
@@ -698,7 +983,7 @@ struct Find_impl
 struct Transform_impl
 {
     template <typename BeginInputIt, typename EndInputIt, typename BeginOutIt, typename UnaryOp>
-    BeginOutIt operator()(BeginInputIt begin, EndInputIt end, BeginOutIt out, UnaryOp op)
+    BeginOutIt operator()(BeginInputIt begin, EndInputIt end, BeginOutIt out, UnaryOp op) const
     {
         return std::transform(begin, end, out, op);
     }
