@@ -1,3 +1,6 @@
+#pragma once
+#include <algorithm>
+
 ///////////////////////////////////
 // Nothing
 ///////////////////////////////////
@@ -692,6 +695,33 @@ struct Find_impl
     }
 };
 
+struct Transform_impl
+{
+    template <typename BeginInputIt, typename EndInputIt, typename BeginOutIt, typename UnaryOp>
+    BeginOutIt operator()(BeginInputIt begin, EndInputIt end, BeginOutIt out, UnaryOp op)
+    {
+        return std::transform(begin, end, out, op);
+    }
+};
+
+struct Begin_impl
+{
+    template <typename T>
+    typename T::const_iterator operator()(const T &a) const
+    {
+        return a.begin();
+    }
+};
+
+struct End_impl
+{
+    template <typename T>
+    typename T::const_iterator operator()(const T &a) const
+    {
+        return a.end();
+    }
+};
+
 template <typename T>
 struct ResultOf<Identity_impl(T)>
 {
@@ -750,6 +780,24 @@ template <typename T, typename U, typename V>
 struct ResultOf<Find_impl(T, U, V)>
 {
     typedef size_t type;
+};
+
+template <typename BeginInputIt, typename EndInputIt, typename BeginOutIt, typename UnaryOp>
+struct ResultOf<Transform_impl(BeginInputIt, EndInputIt, BeginOutIt, UnaryOp)>
+{
+    typedef BeginOutIt type;
+};
+
+template <typename T>
+struct ResultOf<Begin_impl(T)>
+{
+    typedef typename T::const_iterator type;
+};
+
+template <typename T>
+struct ResultOf<End_impl(T)>
+{
+    typedef typename T::const_iterator type;
 };
 
 const Function<Identity_impl> Identity;
