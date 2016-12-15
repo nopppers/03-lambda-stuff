@@ -622,8 +622,8 @@ struct AddTo_impl
 
 struct Sub_impl
 {
-    template <typename T>
-    T operator()(const T &a, const T &b) const
+    template <typename T, typename U>
+    T operator()(const T &a, const U &b) const
     {
         return a - b;
     }
@@ -631,8 +631,8 @@ struct Sub_impl
 
 struct Mul_impl
 {
-    template <typename T>
-    T operator()(const T &a, const T &b) const
+    template <typename T, typename U>
+    T operator()(const T &a, const U &b) const
     {
         return a * b;
     }
@@ -640,8 +640,8 @@ struct Mul_impl
 
 struct MAdd_impl
 {
-    template <typename T>
-    T operator()(const T &a, const T &b, const T &c) const
+    template <typename T, typename U, typename V>
+    T operator()(const T &a, const U &b, const V &c) const
     {
         return a*b + c;
     }
@@ -683,14 +683,14 @@ struct ResultOf<AddTo_impl(T&, U)>
     typedef T& type;
 };
 
-template <typename T>
-struct ResultOf<Sub_impl(T, T)>
+template <typename T, typename U>
+struct ResultOf<Sub_impl(T, U)>
 {
     typedef T type;
 };
 
-template <typename T>
-struct ResultOf<MAdd_impl(T, T, T)>
+template <typename T, typename U, typename V>
+struct ResultOf<MAdd_impl(T, U, V)>
 {
     typedef T type;
 };
