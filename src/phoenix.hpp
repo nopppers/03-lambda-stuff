@@ -716,8 +716,8 @@ struct ResultOf<Length_impl(T)>
     typedef size_t type;
 };
 
-template <typename T>
-struct ResultOf<Substr_impl(T, size_t, size_t)>
+template <typename T, typename U, typename V>
+struct ResultOf<Substr_impl(T, U, V)>
 {
     typedef T type;
 };
