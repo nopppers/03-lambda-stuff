@@ -18,7 +18,10 @@ TEST_CASE("functions")
     REQUIRE(Add(arg1, Length(arg2))(1, std::string("test")) == 5);
     REQUIRE(Substr(arg2, arg3, arg1)(2, std::string("test"), 1) == "es");
     REQUIRE(NotEq(true, arg2)(true, false) == true);
-    REQUIRE(NotEq(Find(std::string("test"), 0, arg1), std::string::npos)("s") == true);
+
+    const char *s = "s";
+    REQUIRE(NotEq(Find(std::string("test"), arg1, 0), std::string::npos)(s) == true);
+    REQUIRE(Find(std::string("test"), arg1, 0)(s) == 2);
 
     int a = 2;
     REQUIRE(AddTo(ref(a), arg1)(1) == 3);
