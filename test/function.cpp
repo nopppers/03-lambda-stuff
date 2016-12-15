@@ -16,6 +16,7 @@ TEST_CASE("functions")
     REQUIRE(MAdd(3, 2, arg1)(1) == 7);
     REQUIRE(Length(arg1)(std::string("test")) == 4);
     REQUIRE(Add(arg1, Length(arg2))(1, std::string("test")) == 5);
+    REQUIRE(Substr(arg2, arg3, arg1)(3, std::string("test"), 1) == "es");
 
     int a = 2;
     REQUIRE(AddTo(ref(a), arg1)(1) == 3);

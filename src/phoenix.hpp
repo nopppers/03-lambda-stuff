@@ -665,6 +665,15 @@ struct Length_impl
     }
 };
 
+struct Substr_impl
+{
+    template <typename T>
+    T operator()(const T &a, size_t pos = 0, size_t count = T::npos) const
+    {
+        return a.substr(pos, count);
+    }
+};
+
 template <typename T>
 struct ResultOf<Identity_impl(T)>
 {
@@ -707,6 +716,12 @@ struct ResultOf<Length_impl(T)>
     typedef size_t type;
 };
 
+template <typename T>
+struct ResultOf<Substr_impl(T, size_t, size_t)>
+{
+    typedef T type;
+};
+
 const Function<Identity_impl> Identity;
 const Function<Add_impl> Add;
 const Function<AddTo_impl> AddTo;
@@ -715,3 +730,4 @@ const Function<Mul_impl> Mul;
 const Function<MAdd_impl> MAdd;
 const Function<Eq_impl> Eq;
 const Function<Length_impl> Length;
+const Function<Substr_impl> Substr;
