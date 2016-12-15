@@ -656,6 +656,15 @@ struct Eq_impl
     }
 };
 
+struct NotEq_impl
+{
+    template <typename T, typename U>
+    bool operator()(const T &a, const U &b) const
+    {
+        return a == b;
+    }
+};
+
 struct Length_impl
 {
     template <typename T>
@@ -671,6 +680,15 @@ struct Substr_impl
     T operator()(const T &a, size_t pos = 0, size_t count = T::npos) const
     {
         return a.substr(pos, count);
+    }
+};
+
+struct Find_impl
+{
+    template <typename T, typename U>
+    size_t operator()(const T &a, const U &b, size_t c = 0) const
+    {
+        return a.find(b, c);
     }
 };
 
@@ -710,6 +728,12 @@ struct ResultOf<Eq_impl(T, U)>
     typedef bool type;
 };
 
+template <typename T, typename U>
+struct ResultOf<NotEq_impl(T, U)>
+{
+    typedef bool type;
+};
+
 template <typename T>
 struct ResultOf<Length_impl(T)>
 {
@@ -722,6 +746,12 @@ struct ResultOf<Substr_impl(T, U, V)>
     typedef T type;
 };
 
+template <typename T, typename U, typename V>
+struct ResultOf<Find_impl(T, U, V)>
+{
+    typedef size_t type;
+};
+
 const Function<Identity_impl> Identity;
 const Function<Add_impl> Add;
 const Function<AddTo_impl> AddTo;
@@ -729,5 +759,7 @@ const Function<Sub_impl> Sub;
 const Function<Mul_impl> Mul;
 const Function<MAdd_impl> MAdd;
 const Function<Eq_impl> Eq;
+const Function<NotEq_impl> Eq;
 const Function<Length_impl> Length;
 const Function<Substr_impl> Substr;
+const Function<Find_impl> Find;
