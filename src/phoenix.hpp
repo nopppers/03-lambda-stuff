@@ -226,7 +226,7 @@ struct Arg<2>
     Arg(){}
 
     template <typename T, typename U, typename V, typename Z>
-    U operator()(const T &, const U &u, const V &, typename Z &) const
+    U operator()(const T &, const U &u, const V &, const Z &) const
     {
         return u;
     }
