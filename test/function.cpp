@@ -17,6 +17,8 @@ TEST_CASE("functions")
     REQUIRE(Length(arg1)(std::string("test")) == 4);
     REQUIRE(Add(arg1, Length(arg2))(1, std::string("test")) == 5);
     REQUIRE(Substr(arg2, arg3, arg1)(2, std::string("test"), 1) == "es");
+    REQUIRE(NotEq(true, arg2)(true, false) == true);
+    REQUIRE(NotEq(Find(std::string("test"), 0, arg1), std::string::npos)("s") == true);
 
     int a = 2;
     REQUIRE(AddTo(ref(a), arg1)(1) == 3);

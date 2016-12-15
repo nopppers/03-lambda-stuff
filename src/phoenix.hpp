@@ -661,7 +661,7 @@ struct NotEq_impl
     template <typename T, typename U>
     bool operator()(const T &a, const U &b) const
     {
-        return a == b;
+        return a != b;
     }
 };
 
@@ -759,7 +759,7 @@ const Function<Sub_impl> Sub;
 const Function<Mul_impl> Mul;
 const Function<MAdd_impl> MAdd;
 const Function<Eq_impl> Eq;
-const Function<NotEq_impl> Eq;
+const Function<NotEq_impl> NotEq;
 const Function<Length_impl> Length;
 const Function<Substr_impl> Substr;
 const Function<Find_impl> Find;
