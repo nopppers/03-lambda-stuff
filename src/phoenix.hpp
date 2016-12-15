@@ -226,7 +226,7 @@ struct Arg<2>
     Arg(){}
 
     template <typename T, typename U, typename V, typename Z>
-    U operator()(const T &, const U &u, const V &, typename Z &) const
+    U operator()(const T &, const U &u, const V &, const Z &) const
     {
         return u;
     }
@@ -575,7 +575,7 @@ struct LazyFunction
     typename ResultOf<
         Func(typename ResultOf<Thing1(T, U)>::type,
              typename ResultOf<Thing2(T, U)>::type,
-             typename ResultOf<Thing4(T, U)>::type,
+             typename ResultOf<Thing3(T, U)>::type,
              typename ResultOf<Thing4(T, U)>::type)
     >::type operator()(const T &t, const U &u) const
     {
@@ -677,7 +677,7 @@ struct Function
                  typename Converter<U>::type,
                  typename Converter<V>::type,
                  typename Converter<Z>::type>
-    operator()(const T &t, const U &u, const V &v, typename Z &z) const
+    operator()(const T &t, const U &u, const V &v, const Z &z) const
     {
         typedef typename Converter<T>::type converter1;
         typedef typename Converter<U>::type converter2;
@@ -1027,6 +1027,12 @@ struct ResultOf<AddTo_impl(T&, U)>
 
 template <typename T, typename U>
 struct ResultOf<Sub_impl(T, U)>
+{
+    typedef T type;
+};
+
+template <typename T, typename U>
+struct ResultOf<Mul_impl(T, U)>
 {
     typedef T type;
 };
