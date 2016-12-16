@@ -1272,13 +1272,13 @@ struct ResultOf<Transform_impl(BeginInputIt, EndInputIt, BeginOutIt, UnaryOp)>
 };
 
 template <typename T>
-struct ResultOf<Begin_impl(T)>
+struct ResultOf<Begin_impl(const T &)>
 {
     typedef typename T::const_iterator type;
 };
 
 template <typename T>
-struct ResultOf<End_impl(T)>
+struct ResultOf<End_impl(const T &)>
 {
     typedef typename T::const_iterator type;
 };
