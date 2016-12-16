@@ -38,6 +38,6 @@ TEST_CASE("functions")
     expected.push_back(4);
     expected.push_back(6);
     Transform(Begin(arg1ref), End(arg1ref), arg2, val(Mul(arg1, 2)))(testVec, out);
-    //REQUIRE(testVec == expected);
+    REQUIRE(output == expected);
 }
 
