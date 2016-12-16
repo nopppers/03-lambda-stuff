@@ -368,6 +368,192 @@ struct ResultOf<Arg<argN>(T)>
 };
 
 ///////////////////////////////////
+// ArgRef
+///////////////////////////////////
+template <size_t I>
+struct ArgRef
+{
+};
+
+template <>
+struct ArgRef<1>
+{
+    ArgRef(){}
+
+    template <typename T, typename U, typename V, typename Z>
+    const T & operator()(const T &t, const U &u, const V &v, const Z &z)
+    {
+        return t;
+    }
+
+    template <typename T, typename U, typename V>
+    const T & operator()(const T &t, const U &, const V &) const
+    {
+        return t;
+    }
+
+    template <typename T, typename U>
+    const T & operator()(const T &t, const U &) const
+    {
+        return t;
+    }
+
+    template <typename T>
+    const T & operator()(const T &t) const
+    {
+        return t;
+    }
+};
+
+template <>
+struct ArgRef<2>
+{
+    ArgRef(){}
+
+    template <typename T, typename U, typename V, typename Z>
+    const U & operator()(const T &, const U &u, const V &, const Z &) const
+    {
+        return u;
+    }
+
+    template <typename T, typename U, typename V>
+    const U & operator()(const T &, const U &u, const V &) const
+    {
+        return u;
+    }
+
+    template <typename T, typename U>
+    const U & operator()(const T &, const U &u) const
+    {
+        return u;
+    }
+};
+
+template <>
+struct ArgRef<3>
+{
+    ArgRef(){}
+
+    template <typename T, typename U, typename V, typename Z>
+    const V & operator()(const T &, const U &, const V &v, const Z &) const
+    {
+        return v;
+    }
+
+    template <typename T, typename U, typename V>
+    const V & operator()(const T &, const U &, const V &v) const
+    {
+        return v;
+    }
+};
+
+template <>
+struct ArgRef<4>
+{
+    ArgRef(){}
+
+    template <typename T, typename U, typename V, typename Z>
+    const Z & operator()(const T &, const U &u, const V &, const Z &z)
+    {
+        return z;
+    }
+};
+
+const ArgRef<1> arg1ref;
+const ArgRef<2> arg2ref;
+const ArgRef<3> arg3ref;
+const ArgRef<4> arg4ref;
+
+template <size_t I, typename T, typename U = Nothing, typename V = Nothing, typename Z = Nothing>
+struct ArgRefReturnType
+{};
+
+template <typename T, typename U, typename V, typename Z>
+struct ArgRefReturnType<1, T, U, V, Z>
+{
+    typedef const T & type;
+};
+
+template <typename T, typename U, typename V, typename Z>
+struct ArgRefReturnType<2, T, U, V, Z>
+{
+    typedef const U & type;
+};
+
+template <typename T, typename U, typename V, typename Z>
+struct ArgRefReturnType<3, T, U, V, Z>
+{
+    typedef const V & type;
+};
+
+template <typename T, typename U, typename V, typename Z>
+struct ArgRefReturnType<4, T, U, V, Z>
+{
+    typedef const Z & type;
+};
+
+template <typename T, typename U, typename V>
+struct ArgRefReturnType<1, T, U, V>
+{
+    typedef const T & type;
+};
+
+template <typename T, typename U, typename V>
+struct ArgRefReturnType<2, T, U, V>
+{
+    typedef const U & type;
+};
+
+template <typename T, typename U, typename V>
+struct ArgRefReturnType<3, T, U, V>
+{
+    typedef const V & type;
+};
+
+template <typename T, typename U>
+struct ArgRefReturnType<1, T, U>
+{
+    typedef const T & type;
+};
+
+template <typename T, typename U>
+struct ArgRefReturnType<2, T, U>
+{
+    typedef const U & type;
+};
+
+template <typename T>
+struct ArgRefReturnType<1, T>
+{
+    typedef const T & type;
+};
+
+template <size_t argN, typename T, typename U, typename V, typename Z>
+struct ResultOf<ArgRef<argN>(T, U, V, Z)>
+{
+    typedef typename ArgRefReturnType<argN, T, U, V, Z>::type type;
+};
+
+template <size_t argN, typename T, typename U, typename V>
+struct ResultOf<ArgRef<argN>(T, U, V)>
+{
+    typedef typename ArgRefReturnType<argN, T, U, V>::type type;
+};
+
+template <size_t argN, typename T, typename U>
+struct ResultOf<ArgRef<argN>(T, U)>
+{
+    typedef typename ArgRefReturnType<argN, T, U>::type type;
+};
+
+template <size_t argN, typename T>
+struct ResultOf<ArgRef<argN>(T)>
+{
+    typedef typename ArgRefReturnType<argN, T>::type type;
+};
+
+
+///////////////////////////////////
 // Function
 ///////////////////////////////////
 template <typename Func, typename Arg1 = Nothing, typename Arg2 = Nothing, typename Arg3 = Nothing, typename Arg4 = Nothing>
@@ -623,6 +809,12 @@ template <size_t I>
 struct Converter<Arg<I> >
 {
     typedef Arg<I> type;
+};
+
+template <size_t I>
+struct Converter<ArgRef<I> >
+{
+    typedef ArgRef<I> type;
 };
 
 template <typename Func, typename T, typename U, typename V, typename Z>
