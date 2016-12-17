@@ -39,5 +39,9 @@ TEST_CASE("functions")
     expected.push_back(6);
     Transform(Begin(arg1ref), End(arg1ref), arg2, val(Mul(arg1, 2)))(testVec, out);
     REQUIRE(output == expected);
+
+    std::string test = "test";
+    REQUIRE(Upper(arg1)(test) == "TEST");
+    REQUIRE(ReverseVal(arg1, arg2)(test.begin(), test.end()) == "tset");
 }
 

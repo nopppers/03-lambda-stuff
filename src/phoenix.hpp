@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <cctype>
 
 ///////////////////////////////////
 // Nothing
@@ -1199,6 +1200,72 @@ struct End_impl
     }
 };
 
+struct Upper_impl
+{
+private:
+    template <typename T>
+    struct ToUpper
+    {
+        T operator()(const T &t) const
+        {
+            return static_cast<T>(toupper(t));
+        }
+    };
+
+public:
+    template <typename T>
+    T operator()(const T &str) const
+    {
+        T temp;
+        temp.reserve(str.size());
+        std::transform(str.begin(), str.end(), std::back_inserter(temp),
+            ToUpper<T::value_type>());
+        return temp;
+    }
+};
+
+struct ReverseVal_impl
+{
+    template <typename BeginInputIt, typename EndInputIt>
+    typename std::iterator_traits<BeginInputIt>::value_type operator()(
+        BeginInputIt begin, EndInputIt end) 
+    {
+        typedef std::iterator_traits<BeginInputIt> traits;
+        typename traits::difference_type dist = std::distance(begin, end);
+        typename traits::value_type tmp;
+        std::reverse_copy(begin, end, std::back_inserter(tmp));
+        return tmp;
+    }
+};
+
+// Half-baked idea
+#if 0 
+template <typename TransformFunctor, typename ValueT>
+struct ValueInsteadOfOutIter_impl
+{
+    TransformFunctor func_;
+    ValueInsteadOfOutIter_impl(TransformFunctor func_){}
+
+    template <typename BeginInputIt, typename EndInputIt>
+    ValueT operator()(BeginInputIt begin, EndInputIt end)
+    {
+        ValueT tmp;
+        tmp.reserve(std::distance(begin, end));
+        func_(begin, end, std::back_inserter(tmp));
+        return tmp;
+    }
+
+    template <typename BeginInputIt, typename EndInputIt, typename Op>
+    ValueT operator()(BeginInputIt begin, EndInputIt end, Op op)
+    {
+        ValueT tmp;
+        tmp.reserve(std::distance(begin, end));
+        func_(begin, end, std::back_inserter(tmp), op);
+        return tmp;
+    }
+};
+#endif
+
 template <typename T>
 struct ResultOf<Identity_impl(T)>
 {
@@ -1283,6 +1350,32 @@ struct ResultOf<End_impl(const T &)>
     typedef typename T::const_iterator type;
 };
 
+template <typename T>
+struct ResultOf<Upper_impl(T)>
+{
+    typedef T type;
+};
+
+template <typename BeginInputIt, typename EndInputIt>
+struct ResultOf<ReverseVal_impl(BeginInputIt, EndInputIt)>
+{
+    typedef typename std::iterator_traits<BeginInputIt>::value_type type;
+};
+
+#if 0
+template <typename TransformFunctor, typename ValueT, typename BeginInputIt, typename EndInputIt>
+struct ResultOf<ValueInsteadOfOutIter_impl<TransformFunctor, ValueT>(BeginInputIt, EndInputIt)>
+{
+    typedef ValueT result;
+};
+
+template <typename TransformFunctor, typename ValueT, typename BeginInputIt, typename EndInputIt, typename Op>
+struct ResultOf<ValueInsteadOfOutIter_impl<TransformFunctor, ValueT>(BeginInputIt, EndInputIt, Op)>
+{
+    typedef ValueT result;
+};
+#endif 
+
 const Function<Identity_impl> Identity;
 const Function<Add_impl> Add;
 const Function<AddTo_impl> AddTo;
@@ -1297,3 +1390,6 @@ const Function<Find_impl> Find;
 const Function<Transform_impl> Transform;
 const Function<Begin_impl> Begin;
 const Function<End_impl> End;
+const Function<Upper_impl> Upper;
+const Function<ReverseVal_impl> ReverseVal;
+
