@@ -1219,7 +1219,7 @@ public:
         T temp;
         temp.reserve(str.size());
         std::transform(str.begin(), str.end(), std::back_inserter(temp),
-            ToUpper<T::value_type>());
+            ToUpper<typename T::value_type>());
         return temp;
     }
 };
