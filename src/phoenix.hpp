@@ -1224,15 +1224,15 @@ public:
     }
 };
 
+template <typename ValueT>
 struct ReverseVal_impl
 {
     template <typename BeginInputIt, typename EndInputIt>
-    typename std::iterator_traits<BeginInputIt>::value_type operator()(
-        BeginInputIt begin, EndInputIt end) 
+    ValueT operator()(BeginInputIt begin, EndInputIt end) const 
     {
         typedef std::iterator_traits<BeginInputIt> traits;
         typename traits::difference_type dist = std::distance(begin, end);
-        typename traits::value_type tmp;
+        ValueT tmp;
         std::reverse_copy(begin, end, std::back_inserter(tmp));
         return tmp;
     }
@@ -1356,10 +1356,10 @@ struct ResultOf<Upper_impl(T)>
     typedef T type;
 };
 
-template <typename BeginInputIt, typename EndInputIt>
-struct ResultOf<ReverseVal_impl(BeginInputIt, EndInputIt)>
+template <typename ValueT, typename BeginInputIt, typename EndInputIt>
+struct ResultOf<ReverseVal_impl<ValueT>(BeginInputIt, EndInputIt)>
 {
-    typedef typename std::iterator_traits<BeginInputIt>::value_type type;
+    typedef ValueT type;
 };
 
 #if 0
@@ -1391,5 +1391,12 @@ const Function<Transform_impl> Transform;
 const Function<Begin_impl> Begin;
 const Function<End_impl> End;
 const Function<Upper_impl> Upper;
-const Function<ReverseVal_impl> ReverseVal;
+
+template <typename ValueT>
+Function<ReverseVal_impl<ValueT> > ReverseVal()
+{
+    return Function<ReverseVal_impl<ValueT> >();
+}
+
+//const Function<ReverseVal_impl> ReverseVal;
 

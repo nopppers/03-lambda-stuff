@@ -42,6 +42,6 @@ TEST_CASE("functions")
 
     std::string test = "test";
     REQUIRE(Upper(arg1)(test) == "TEST");
-    REQUIRE(ReverseVal(arg1, arg2)(test.begin(), test.end()) == "tset");
+    REQUIRE(ReverseVal<std::string>()(arg1, arg2)(test.begin(), test.end()) == "tset");
 }
 
